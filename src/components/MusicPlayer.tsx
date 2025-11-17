@@ -241,7 +241,7 @@ function MusicPlayer() {
                 {songs[currentSongIndex]?.title || 'ELECTRONIC FUTURE'}
               </h1>
             </div>
-            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem' }}>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '180px' }}>
               <p className="text-green-500 text-sm leading-none">{songs[currentSongIndex]?.artist || 'ELECTRONIC DREAMS'}</p>
             </div>
             <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-1px)' }}>
