@@ -190,7 +190,7 @@ function MusicPlayer() {
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
           <div className={`absolute top-[16%] left-1/2 -translate-x-1/2 text-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)', width: '200px', overflow: 'hidden' }}>
+            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)', width: '250px', overflow: 'hidden' }}>
               <h1 
                 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap"
                 style={{ 
