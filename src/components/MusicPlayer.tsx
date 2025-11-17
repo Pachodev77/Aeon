@@ -14,6 +14,7 @@ function MusicPlayer() {
   const [songs, setSongs] = useState<Song[]>([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [marqueePosition, setMarqueePosition] = useState(0);
+  const [currentTimeDisplay, setCurrentTimeDisplay] = useState(new Date());
   const playlistManager = useRef(new PlaylistManager());
   const audioRef = useRef<HTMLAudioElement>(null);
   const visualizerRef = useRef<CubeVisualizer | null>(null);
@@ -25,6 +26,15 @@ function MusicPlayer() {
       setSongs(loadedSongs);
     };
     loadSongs();
+  }, []);
+
+  useEffect(() => {
+    // Update current time every second
+    const interval = setInterval(() => {
+      setCurrentTimeDisplay(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -241,11 +251,11 @@ function MusicPlayer() {
                 {songs[currentSongIndex]?.title || 'ELECTRONIC FUTURE'}
               </h1>
             </div>
-            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '220px' }}>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '220px', transform: 'translateY(-4px)' }}>
               <p className="text-green-500 text-sm leading-none">{songs[currentSongIndex]?.artist || 'ELECTRONIC DREAMS'}</p>
             </div>
-            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-1px)' }}>
-              <p className="text-green-400 text-sm leading-none">{formatTime(currentTime)}:{formatTime(duration)}</p>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-3px)' }}>
+              <p className="text-green-400 text-sm leading-none">{currentTimeDisplay.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
 
