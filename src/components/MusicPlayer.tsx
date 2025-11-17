@@ -250,6 +250,20 @@ function MusicPlayer() {
           />
         </div>
       </div>
+
+      {/* Inverted background image for playlist at the bottom */}
+      <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
+        <img
+          src="/Copilot_20251116_160743.png"
+          alt="Playlist Background"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ 
+            transform: 'scaleX(1.015) rotateX(180deg)',
+            filter: 'invert(1)',
+            opacity: 0.7
+          }}
+        />
+      </div>
     </div>
   );
 }
