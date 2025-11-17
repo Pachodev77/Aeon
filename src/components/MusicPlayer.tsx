@@ -15,6 +15,7 @@ function MusicPlayer() {
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
   const [marqueePosition, setMarqueePosition] = useState(0);
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState(new Date());
+  const [isLocalMode, setIsLocalMode] = useState(false);
   const playlistManager = useRef(new PlaylistManager());
   const audioRef = useRef<HTMLAudioElement>(null);
   const visualizerRef = useRef<H2RVisualizer | null>(null);
@@ -22,11 +23,18 @@ function MusicPlayer() {
 
   useEffect(() => {
     const loadSongs = async () => {
-      const loadedSongs = await playlistManager.current.loadSongsFromMusicFolder();
-      setSongs(loadedSongs);
+      if (isLocalMode) {
+        // Load local device songs
+        const loadedSongs = await playlistManager.current.loadLocalDeviceSongs();
+        setSongs(loadedSongs);
+      } else {
+        // Load music folder songs (default)
+        const loadedSongs = await playlistManager.current.loadSongsFromMusicFolder();
+        setSongs(loadedSongs);
+      }
     };
     loadSongs();
-  }, []);
+  }, [isLocalMode]);
 
   useEffect(() => {
     // Update current time every second
@@ -353,8 +361,15 @@ function MusicPlayer() {
                 </svg>
               </button>
 
-              <button className="w-6 h-6 rounded border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <button 
+                onClick={() => setIsLocalMode(!isLocalMode)}
+                className={`w-7 h-7 rounded-full border flex items-center justify-center transition-colors opacity-60 hover:opacity-100 ${
+                  isLocalMode 
+                    ? 'bg-green-600 border-green-500 text-white' 
+                    : 'border-green-600/40 text-green-500 hover:border-green-500'
+                }`}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                   <polyline points="9 22 9 12 15 12 15 22" />
                 </svg>

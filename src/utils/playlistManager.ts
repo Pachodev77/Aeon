@@ -122,6 +122,46 @@ export class PlaylistManager {
     }
   }
 
+  async loadLocalDeviceSongs(): Promise<Song[]> {
+    try {
+      // Request user to select local music files
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+      fileInput.multiple = true;
+      fileInput.accept = 'audio/*';
+      
+      return new Promise<Song[]>((resolve) => {
+        fileInput.onchange = (event) => {
+          const files = (event.target as HTMLInputElement).files;
+          if (!files || files.length === 0) {
+            resolve([]);
+            return;
+          }
+
+          const localSongs: Song[] = Array.from(files).map((file, index) => ({
+            id: `local-${index}`,
+            title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+            artist: 'Local File',
+            duration: 0,
+            url: URL.createObjectURL(file)
+          }));
+
+          this.songs = localSongs;
+          resolve(localSongs);
+        };
+
+        fileInput.oncancel = () => {
+          resolve([]);
+        };
+
+        fileInput.click();
+      });
+    } catch (error) {
+      console.error('Error loading local songs:', error);
+      return [];
+    }
+  }
+
   getSongs(): Song[] {
     return this.songs;
   }
