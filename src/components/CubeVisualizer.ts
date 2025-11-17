@@ -83,13 +83,16 @@ export class H2RVisualizer {
         });
         
         // Scale and position the model
-        this.model.scale.set(1.5, 1.5, 1.5); // Make model a bit larger
-        this.model.position.set(0, 0, 0);
+        this.model.scale.set(2.5, 2.5, 2.5); // Make model larger for smaller container
+        this.model.position.set(0, 0, 0); // Start from center
         
         // Center the model
         const box = new THREE.Box3().setFromObject(this.model);
         const center = box.getCenter(new THREE.Vector3());
         this.model.position.sub(center);
+        
+        // Apply downward offset after centering
+        this.model.position.y -= 0.2; // Move model slightly down within container (negative Y)
         
         this.scene.add(this.model);
         console.log('H2R model loaded successfully!');
@@ -255,7 +258,12 @@ export class H2RVisualizer {
       }
 
       // Remove pulse effect - keep constant scale
-      this.model.scale.set(1.5, 1.5, 1.5);
+      this.model.scale.set(2.5, 2.5, 2.5);
+      
+      // Maintain downward position in animation loop
+      if (this.model.position.y > -0.2) {
+        this.model.position.y = -0.2;
+      }
     }
 
     this.renderer.render(this.scene, this.camera);
