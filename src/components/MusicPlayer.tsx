@@ -127,10 +127,15 @@ function MusicPlayer() {
       setDuration(nextSong.duration);
       if (audioRef.current) {
         try {
+          // Stop current playback
+          audioRef.current.pause();
+          // Load new song
           audioRef.current.src = nextSong.url;
-          if (isPlaying) {
-            await audioRef.current.play();
-          }
+          // Wait a bit for the source to load
+          await new Promise(resolve => setTimeout(resolve, 100));
+          // Always play next song
+          await audioRef.current.play();
+          setIsPlaying(true);
         } catch (error) {
           console.error('Next song error:', error);
           setIsPlaying(false);
@@ -148,10 +153,15 @@ function MusicPlayer() {
       setDuration(prevSong.duration);
       if (audioRef.current) {
         try {
+          // Stop current playback
+          audioRef.current.pause();
+          // Load new song
           audioRef.current.src = prevSong.url;
-          if (isPlaying) {
-            await audioRef.current.play();
-          }
+          // Wait a bit for the source to load
+          await new Promise(resolve => setTimeout(resolve, 100));
+          // Always play previous song
+          await audioRef.current.play();
+          setIsPlaying(true);
         } catch (error) {
           console.error('Previous song error:', error);
           setIsPlaying(false);
@@ -167,10 +177,15 @@ function MusicPlayer() {
     setDuration(song.duration);
     if (audioRef.current) {
       try {
+        // Stop current playback
+        audioRef.current.pause();
+        // Load selected song
         audioRef.current.src = song.url;
-        if (isPlaying) {
-          await audioRef.current.play();
-        }
+        // Wait a bit for the source to load
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // Always play selected song
+        await audioRef.current.play();
+        setIsPlaying(true);
       } catch (error) {
         console.error('Song select error:', error);
         setIsPlaying(false);
