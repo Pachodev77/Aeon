@@ -67,12 +67,12 @@ function MusicPlayer() {
   };
 
   return (
-    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center overflow-hidden bg-black">
+    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center overflow-visible bg-black">
       <img
         src="/Copilot_20251116_160743.png"
         alt="Music Player Background"
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-0' : 'opacity-100'}`}
-        style={{ transform: 'scaleY(1.2)' }}
+        style={{ transform: 'scaleY(1.3)' }}
       />
       <video
         src="/grok-video.mp4"
@@ -81,7 +81,7 @@ function MusicPlayer() {
         muted
         playsInline
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
-        style={{ transform: 'scaleY(1.2)' }}
+        style={{ transform: 'scaleY(1.3)' }}
       />
 
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
