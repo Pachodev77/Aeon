@@ -13,6 +13,8 @@ export class H2RVisualizer {
   private targetRotationX: number = 0;
   private targetRotationY: number = 0;
   private isDragging: boolean = false;
+  private static cachedModel: THREE.Group | null = null;
+  private static isLoading: boolean = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -41,61 +43,75 @@ export class H2RVisualizer {
     this.renderer.setClearColor(0x000000, 0);
     this.container.appendChild(this.renderer.domElement);
 
-    // Load H2R model with error handling
-    const loader = new GLTFLoader();
-    loader.load('/h2r-extracted/scene.gltf', (gltf: GLTF) => {
-      this.model = gltf.scene;
-      
-      // Apply materials to make model fully colored and visible
-      this.model.traverse((child) => {
-        if (child instanceof THREE.Mesh) {
-          // Ensure mesh has proper material
-          if (child.material) {
-            // Make material fully opaque and colored
-            child.material.transparent = false;
-            child.material.opacity = 1.0;
-            child.material.needsUpdate = true;
-            
-            // If using basic material, convert to standard for better lighting
-            if (child.material instanceof THREE.MeshBasicMaterial) {
-              const color = child.material.color;
-              child.material = new THREE.MeshStandardMaterial({
-                color: color,
-                metalness: 0.3,
-                roughness: 0.4
-              });
+    // Load H2R model with caching
+    this.loadH2RModel();
+  }
+
+  private loadH2RModel() {
+    if (H2RVisualizer.cachedModel) {
+      this.model = H2RVisualizer.cachedModel.clone();
+      this.scene.add(this.model);
+      console.log('H2R model loaded from cache!');
+    } else if (!H2RVisualizer.isLoading) {
+      H2RVisualizer.isLoading = true;
+      const loader = new GLTFLoader();
+      loader.load('/h2r-extracted/scene.gltf', (gltf: GLTF) => {
+        H2RVisualizer.cachedModel = gltf.scene;
+        this.model = H2RVisualizer.cachedModel.clone();
+        
+        // Apply materials to make model fully colored and visible
+        this.model.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            // Ensure mesh has proper material
+            if (child.material) {
+              // Make material fully opaque and colored
+              child.material.transparent = false;
+              child.material.opacity = 1.0;
+              child.material.needsUpdate = true;
+              
+              // If using basic material, convert to standard for better lighting
+              if (child.material instanceof THREE.MeshBasicMaterial) {
+                const color = child.material.color;
+                child.material = new THREE.MeshStandardMaterial({
+                  color: color,
+                  metalness: 0.3,
+                  roughness: 0.4
+                });
+              }
             }
           }
-        }
+        });
+        
+        // Scale and position the model
+        this.model.scale.set(1.5, 1.5, 1.5); // Make model a bit larger
+        this.model.position.set(0, 0, 0);
+        
+        // Center the model
+        const box = new THREE.Box3().setFromObject(this.model);
+        const center = box.getCenter(new THREE.Vector3());
+        this.model.position.sub(center);
+        
+        this.scene.add(this.model);
+        console.log('H2R model loaded successfully!');
+        H2RVisualizer.isLoading = false;
+      }, 
+      (progress: any) => {
+        console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
+      },
+      (error: any) => {
+        console.error('Error loading H2R model:', error);
+        H2RVisualizer.isLoading = false;
+        // Fallback to a simple cube if model fails to load
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshStandardMaterial({ 
+          color: 0x22c55e,
+          metalness: 0.6,
+          roughness: 0.3
+        });
+        this.model = new THREE.Mesh(geometry, material);
+        this.scene.add(this.model);
       });
-      
-      // Scale and position the model
-      this.model.scale.set(2.5, 2.5, 2.5); // Make model much larger
-      this.model.position.set(0, 0, 0);
-      
-      // Center the model
-      const box = new THREE.Box3().setFromObject(this.model);
-      const center = box.getCenter(new THREE.Vector3());
-      this.model.position.sub(center);
-      
-      this.scene.add(this.model);
-      console.log('H2R model loaded successfully!');
-    }, 
-    (progress: any) => {
-      console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
-    },
-    (error: any) => {
-      console.error('Error loading H2R model:', error);
-      // Fallback to a simple cube if model fails to load
-      const geometry = new THREE.BoxGeometry(2, 2, 2);
-      const material = new THREE.MeshStandardMaterial({ 
-        color: 0x22c55e,
-        metalness: 0.6,
-        roughness: 0.3
-      });
-      this.model = new THREE.Mesh(geometry, material);
-      this.scene.add(this.model);
-    });
+    }
 
     // Add comprehensive lighting system for full model illumination
     const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Increased from 1.2 to 2.0
@@ -239,7 +255,7 @@ export class H2RVisualizer {
       }
 
       // Remove pulse effect - keep constant scale
-      this.model.scale.set(2.5, 2.5, 2.5);
+      this.model.scale.set(1.5, 1.5, 1.5);
     }
 
     this.renderer.render(this.scene, this.camera);
