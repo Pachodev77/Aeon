@@ -40,11 +40,11 @@ function MusicPlayer() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMarqueePosition((prev) => {
-        // Continuous scrolling - reset when text is completely out of view
-        if (prev <= -500) {
-          return 500; // Start from much further right for continuous effect
+        // Much faster scrolling - immediate reset for continuous effect
+        if (prev <= -100) {
+          return 100; // Start from right for immediate return
         }
-        return prev - 0.1; // Much slower for better visibility
+        return prev - 0.8; // Much faster speed
       });
     }, 50);
 
@@ -255,7 +255,7 @@ function MusicPlayer() {
             <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '220px', transform: 'translateY(-6px)' }}>
               <p className="text-green-500 text-sm leading-none">{songs[currentSongIndex]?.artist || 'ELECTRONIC DREAMS'}</p>
             </div>
-            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-3px)' }}>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-8px)' }}>
               <p className="text-green-400 text-sm leading-none">{currentTimeDisplay.toLocaleTimeString('en-US', { hour12: true, hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
