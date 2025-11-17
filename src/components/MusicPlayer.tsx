@@ -97,18 +97,28 @@ function MusicPlayer() {
     }
   };
 
-  const handlePlayPause = () => {
+  const handlePlayPause = async () => {
     if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+          setIsPlaying(false);
+        } else {
+          // Make sure we have a valid source before playing
+          if (songs[currentSongIndex]) {
+            audioRef.current.src = songs[currentSongIndex].url;
+            await audioRef.current.play();
+            setIsPlaying(true);
+          }
+        }
+      } catch (error) {
+        console.error('Audio play error:', error);
+        setIsPlaying(false);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleNextSong = () => {
+  const handleNextSong = async () => {
     const nextSong = playlistManager.current.getNextSong();
     if (nextSong) {
       const nextIndex = songs.findIndex(song => song.id === nextSong.id);
@@ -116,15 +126,20 @@ function MusicPlayer() {
       setCurrentTime(0);
       setDuration(nextSong.duration);
       if (audioRef.current) {
-        audioRef.current.src = nextSong.url;
-        if (isPlaying) {
-          audioRef.current.play();
+        try {
+          audioRef.current.src = nextSong.url;
+          if (isPlaying) {
+            await audioRef.current.play();
+          }
+        } catch (error) {
+          console.error('Next song error:', error);
+          setIsPlaying(false);
         }
       }
     }
   };
 
-  const handlePreviousSong = () => {
+  const handlePreviousSong = async () => {
     const prevSong = playlistManager.current.getPreviousSong();
     if (prevSong) {
       const prevIndex = songs.findIndex(song => song.id === prevSong.id);
@@ -132,23 +147,33 @@ function MusicPlayer() {
       setCurrentTime(0);
       setDuration(prevSong.duration);
       if (audioRef.current) {
-        audioRef.current.src = prevSong.url;
-        if (isPlaying) {
-          audioRef.current.play();
+        try {
+          audioRef.current.src = prevSong.url;
+          if (isPlaying) {
+            await audioRef.current.play();
+          }
+        } catch (error) {
+          console.error('Previous song error:', error);
+          setIsPlaying(false);
         }
       }
     }
   };
 
-  const handleSongSelect = (index: number) => {
+  const handleSongSelect = async (index: number) => {
     setCurrentSongIndex(index);
     setCurrentTime(0);
     const song = songs[index];
     setDuration(song.duration);
     if (audioRef.current) {
-      audioRef.current.src = song.url;
-      if (isPlaying) {
-        audioRef.current.play();
+      try {
+        audioRef.current.src = song.url;
+        if (isPlaying) {
+          await audioRef.current.play();
+        }
+      } catch (error) {
+        console.error('Song select error:', error);
+        setIsPlaying(false);
       }
     }
     setShowPlaylist(false);
