@@ -208,7 +208,7 @@ function MusicPlayer() {
             </div>
           </div>
 
-          <div className="absolute top-[85%] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
+          <div className="absolute top-[86%] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
             <button className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
