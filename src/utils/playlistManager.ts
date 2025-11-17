@@ -128,7 +128,8 @@ export class PlaylistManager {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.multiple = true;
-      fileInput.accept = 'audio/*';
+      fileInput.accept = '.mp3,.wav,.ogg,.m4a,.flac,.aac'; // Specific audio formats
+      fileInput.setAttribute('capture', 'filesystem'); // Explicitly request file system access
       
       return new Promise<Song[]>((resolve) => {
         fileInput.onchange = (event) => {
