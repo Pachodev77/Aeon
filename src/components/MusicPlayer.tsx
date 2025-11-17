@@ -67,12 +67,12 @@ function MusicPlayer() {
   };
 
   return (
-    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center bg-black" style={{ minHeight: '100vh' }}>
+    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center overflow-hidden bg-black">
       <img
         src="/Copilot_20251116_160743.png"
         alt="Music Player Background"
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-0' : 'opacity-100'}`}
-        style={{ transform: 'scaleX(1.015)' }}
+        style={{ transform: 'scaleY(1.2)' }}
       />
       <video
         src="/grok-video.mp4"
@@ -81,6 +81,7 @@ function MusicPlayer() {
         muted
         playsInline
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
+        style={{ transform: 'scaleY(1.2)' }}
       />
 
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
@@ -248,36 +249,6 @@ function MusicPlayer() {
             className={`absolute top-[20%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
             style={{ pointerEvents: 'auto' }}
           />
-        </div>
-      </div>
-
-      {/* Inverted background image for playlist - positioned below the main content */}
-      <div className="relative w-full h-96 bg-black">
-        <img
-          src="/Copilot_20251116_160743.png"
-          alt="Playlist Background"
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ 
-            transform: 'scaleX(1.015) rotateX(180deg)',
-            filter: 'invert(1)',
-            opacity: 0.7
-          }}
-        />
-        {/* Placeholder for playlist content */}
-        <div className="relative z-10 p-6 text-green-400">
-          <h2 className="text-xl font-bold mb-4">Playlist</h2>
-          <div className="space-y-2">
-            <div className="bg-green-950/80 p-3 rounded">Track 1 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 2 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 3 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 4 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 5 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 6 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 7 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 8 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 9 - Artist Name</div>
-            <div className="bg-green-950/80 p-3 rounded">Track 10 - Artist Name</div>
-          </div>
         </div>
       </div>
     </div>
