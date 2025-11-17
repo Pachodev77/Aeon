@@ -1,32 +1,45 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Repeat } from 'lucide-react';
 import { CubeVisualizer } from './CubeVisualizer';
+import { PlaylistManager, Song } from '../utils/playlistManager';
 
 function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(91);
-  const [duration] = useState(221);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(70);
   const [isLiked, setIsLiked] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [showPlaylist, setShowPlaylist] = useState(false);
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [currentSongIndex, setCurrentSongIndex] = useState(0);
+  const playlistManager = useRef(new PlaylistManager());
+  const audioRef = useRef<HTMLAudioElement>(null);
   const visualizerRef = useRef<CubeVisualizer | null>(null);
   const visualizerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const loadSongs = async () => {
+      const loadedSongs = await playlistManager.current.loadSongsFromMusicFolder();
+      setSongs(loadedSongs);
+    };
+    loadSongs();
+  }, []);
+
+  useEffect(() => {
     let interval: number;
-    if (isPlaying) {
+    if (isPlaying && audioRef.current) {
       interval = setInterval(() => {
-        setCurrentTime((prev) => {
-          if (prev >= duration) {
-            setIsPlaying(false);
-            return 0;
+        if (audioRef.current) {
+          setCurrentTime(Math.floor(audioRef.current.currentTime));
+          if (audioRef.current.currentTime >= audioRef.current.duration) {
+            handleNextSong();
           }
-          return prev + 1;
-        });
+        }
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, duration]);
+  }, [isPlaying]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -63,11 +76,82 @@ function MusicPlayer() {
   }, []);
 
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentTime(Number(e.target.value));
+    const newTime = Number(e.target.value);
+    setCurrentTime(newTime);
+    if (audioRef.current) {
+      audioRef.current.currentTime = newTime;
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleNextSong = () => {
+    const nextSong = playlistManager.current.getNextSong();
+    if (nextSong) {
+      const nextIndex = songs.findIndex(song => song.id === nextSong.id);
+      setCurrentSongIndex(nextIndex);
+      setCurrentTime(0);
+      setDuration(nextSong.duration);
+      if (audioRef.current) {
+        audioRef.current.src = nextSong.url;
+        if (isPlaying) {
+          audioRef.current.play();
+        }
+      }
+    }
+  };
+
+  const handlePreviousSong = () => {
+    const prevSong = playlistManager.current.getPreviousSong();
+    if (prevSong) {
+      const prevIndex = songs.findIndex(song => song.id === prevSong.id);
+      setCurrentSongIndex(prevIndex);
+      setCurrentTime(0);
+      setDuration(prevSong.duration);
+      if (audioRef.current) {
+        audioRef.current.src = prevSong.url;
+        if (isPlaying) {
+          audioRef.current.play();
+        }
+      }
+    }
+  };
+
+  const handleSongSelect = (index: number) => {
+    setCurrentSongIndex(index);
+    setCurrentTime(0);
+    const song = songs[index];
+    setDuration(song.duration);
+    if (audioRef.current) {
+      audioRef.current.src = song.url;
+      if (isPlaying) {
+        audioRef.current.play();
+      }
+    }
+    setShowPlaylist(false);
   };
 
   return (
     <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center overflow-visible bg-black">
+      {/* Hidden Audio Element */}
+      <audio
+        ref={audioRef}
+        src={songs[currentSongIndex]?.url || ''}
+        onLoadedMetadata={(e) => {
+          const audio = e.currentTarget;
+          setDuration(Math.floor(audio.duration));
+        }}
+      />
+
       <img
         src="/Copilot_20251116_160743.png"
         alt="Music Player Background"
@@ -94,17 +178,14 @@ function MusicPlayer() {
           <div className={`absolute top-[16%] left-1/2 -translate-x-1/2 text-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
             <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)' }}>
               <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
-                ELECTRONIC FUTURE
+                {songs[currentSongIndex]?.title || 'ELECTRONIC FUTURE'}
               </h1>
             </div>
             <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem' }}>
-              <p className="text-green-500 text-sm tracking-widest whitespace-nowrap">
-                ELECTRONIC DREAMS
-              </p>
+              <p className="text-green-500 text-sm leading-none">{songs[currentSongIndex]?.artist || 'ELECTRONIC DREAMS'}</p>
             </div>
-            <br />
-            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-1px)' }}>
-              <p className="text-green-400 text-sm leading-none">1:3:1</p>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-1px)' }}>
+              <p className="text-green-400 text-sm leading-none">{formatTime(currentTime)}:{formatTime(duration)}</p>
             </div>
           </div>
 
@@ -150,13 +231,14 @@ function MusicPlayer() {
             <Shuffle size={16} />
           </button>
 
-          <button className="absolute top-[70%] left-1/2 -translate-x-1/2 text-green-500 hover:text-green-400 transition-colors opacity-70 hover:opacity-100 flex items-start justify-center" style={{ transform: 'translateX(-80px) translateY(8px)' }}>
+          <button className="absolute top-[70%] left-1/2 -translate-x-1/2 text-green-500 hover:text-green-400 transition-colors opacity-70 hover:opacity-100 flex items-start justify-center" style={{ transform: 'translateX(-80px) translateY(8px)' }}
+            onClick={handlePreviousSong}>
             <SkipBack size={18} fill="currentColor" />
           </button>
 
           <button
             onClick={() => {
-              setIsPlaying(!isPlaying);
+              handlePlayPause();
               setShowVideo(!isPlaying);
             }}
             className="absolute top-[70%] left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-black flex items-center justify-center text-green-500 hover:bg-gray-900 transition-all hover:scale-105"
@@ -164,7 +246,8 @@ function MusicPlayer() {
             {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" className="ml-0.5" />}
           </button>
 
-          <button className="absolute top-[70%] left-1/2 -translate-x-1/2 text-green-500 hover:text-green-400 transition-colors opacity-70 hover:opacity-100 flex items-start justify-center" style={{ transform: 'translateX(62px) translateY(8px)' }}>
+          <button className="absolute top-[70%] left-1/2 -translate-x-1/2 text-green-500 hover:text-green-400 transition-colors opacity-70 hover:opacity-100 flex items-start justify-center" style={{ transform: 'translateX(62px) translateY(8px)' }}
+            onClick={handleNextSong}>
             <SkipForward size={18} fill="currentColor" />
           </button>
 
@@ -209,7 +292,10 @@ function MusicPlayer() {
           </div>
 
           <div className="absolute top-[86%] left-1/2 -translate-x-1/2 flex items-center justify-center gap-2">
-            <button className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
+            <button 
+              onClick={() => setShowPlaylist(!showPlaylist)}
+              className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100"
+            >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                 <circle cx="9" cy="7" r="4" />
@@ -254,6 +340,28 @@ function MusicPlayer() {
             className={`absolute top-[20%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
             style={{ pointerEvents: 'auto' }}
           />
+
+          {/* Playlist Panel */}
+          {showPlaylist && (
+            <div className="absolute top-[12%] left-1/2 -translate-x-1/2 w-[calc(80%-10px)] bg-black/80 backdrop-blur-sm rounded-lg p-4 border border-green-600/40 transition-opacity duration-300">
+              <h3 className="text-green-400 text-sm font-bold mb-3 text-center">Playlist</h3>
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {songs.map((song, index) => (
+                  <div 
+                    key={song.id}
+                    onClick={() => handleSongSelect(index)}
+                    className={`text-xs cursor-pointer transition-colors p-2 rounded ${
+                      index === currentSongIndex 
+                        ? 'text-green-400 bg-green-950/30' 
+                        : 'text-green-500 hover:text-green-400'
+                    }`}
+                  >
+                    {index + 1}. {song.title} - {song.artist}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
