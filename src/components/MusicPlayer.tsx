@@ -408,7 +408,7 @@ function MusicPlayer() {
           {/* 3D H2R Visualizer - Only visible when music is not playing */}
           <div 
             ref={visualizerContainerRef}
-            className={`absolute top-[20%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+            className={`absolute top-[28%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-100`}
             style={{ pointerEvents: 'auto' }}
           />
 
