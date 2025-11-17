@@ -409,7 +409,7 @@ function MusicPlayer() {
           <div 
             ref={visualizerContainerRef}
             className={`absolute inset-0 w-full h-full flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-50`}
-            style={{ pointerEvents: 'auto', zIndex: 50 }}
+            style={{ pointerEvents: 'none', zIndex: 50 }}
           />
 
           {/* Playlist Panel */}
