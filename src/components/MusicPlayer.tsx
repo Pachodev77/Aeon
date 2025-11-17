@@ -86,19 +86,19 @@ function MusicPlayer() {
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
           <div className={`absolute top-[18%] left-1/2 -translate-x-1/2 text-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="bg-green-950 px-2 py-0.5 rounded-lg inline-block" style={{ transform: 'translateY(4px)' }}>
+            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)' }}>
               <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
                 ELECTRONIC FUTURE
               </h1>
             </div>
-            <div className="bg-green-950 px-4 py-1 rounded-lg inline-block mt-0.25">
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem' }}>
               <p className="text-green-500 text-sm tracking-widest whitespace-nowrap">
                 ELECTRONIC DREAMS
               </p>
             </div>
             <br />
-            <div className="bg-green-950 px-2 py-1 rounded-lg inline-block">
-              <p className="text-green-400 text-sm">1:3:1</p>
+            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem' }}>
+              <p className="text-green-400 text-sm leading-none">1:3:1</p>
             </div>
           </div>
 
@@ -120,12 +120,12 @@ function MusicPlayer() {
             </div>
           </div>
 
-          <div className={`absolute left-1/2 -translate-x-1/2 w-[70%] bg-black py-1 rounded-lg transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`} style={{ top: '54%' }}>
-            <div className="flex justify-between items-center mb-0.5">
+          <div className={`absolute left-1/2 -translate-x-1/2 w-[70%] bg-green-950 rounded-lg transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`} style={{ top: '55%', backgroundColor: '#010d0d' }}>
+            <div className="flex justify-between items-center px-2 leading-none -mb-3">
               <span className="text-green-400 text-xs font-mono">{formatTime(currentTime)}</span>
               <span className="text-green-400 text-xs font-mono">{formatTime(duration)}</span>
             </div>
-            <div className="w-[85%] mx-auto">
+            <div className="w-[95%] mx-auto">
               <input
                 type="range"
                 min="0"
