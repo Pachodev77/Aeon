@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Repeat } from 'lucide-react';
+import { CubeVisualizer } from './CubeVisualizer';
 
 function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -8,6 +9,8 @@ function MusicPlayer() {
   const [volume, setVolume] = useState(70);
   const [isLiked, setIsLiked] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const visualizerRef = useRef<CubeVisualizer | null>(null);
+  const visualizerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let interval: number;
@@ -31,6 +34,34 @@ function MusicPlayer() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  useEffect(() => {
+    if (!isPlaying && visualizerContainerRef.current && !visualizerRef.current) {
+      visualizerRef.current = new CubeVisualizer(visualizerContainerRef.current);
+      visualizerRef.current.start();
+    } else if (isPlaying && visualizerRef.current) {
+      visualizerRef.current.dispose();
+      visualizerRef.current = null;
+    }
+
+    return () => {
+      if (visualizerRef.current) {
+        visualizerRef.current.dispose();
+        visualizerRef.current = null;
+      }
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (visualizerRef.current) {
+        visualizerRef.current.handleResize();
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCurrentTime(Number(e.target.value));
   };
@@ -53,7 +84,7 @@ function MusicPlayer() {
 
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
-          <div className="absolute top-[18%] left-1/2 -translate-x-1/2 text-center bg-green-950 px-2 py-1 rounded-lg">
+          <div className={`absolute top-[18%] left-1/2 -translate-x-1/2 text-center bg-green-950 px-2 py-1 rounded-lg transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
             <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
               ELECTRONIC FUTURE
             </h1>
@@ -63,7 +94,7 @@ function MusicPlayer() {
             <p className="text-green-400 text-sm mt-1">1:3:1</p>
           </div>
 
-          <div className="absolute top-[32%] left-1/2 -translate-x-1/2 w-48 h-48 flex items-center justify-center">
+          <div className={`absolute top-[32%] left-1/2 -translate-x-1/2 w-48 h-48 flex items-center justify-center ${isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}>
             <div className="flex items-end justify-center gap-0.5 h-20">
               {Array.from({ length: 32 }).map((_, i) => {
                 const height = Math.sin(i * 0.3) * 35 + 35 + Math.random() * 15;
@@ -81,7 +112,7 @@ function MusicPlayer() {
             </div>
           </div>
 
-          <div className="absolute left-1/2 -translate-x-1/2 w-[70%] bg-black py-1 rounded-lg" style={{ top: '54%' }}>
+          <div className={`absolute left-1/2 -translate-x-1/2 w-[70%] bg-black py-1 rounded-lg transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`} style={{ top: '54%' }}>
             <div className="flex justify-between items-center mb-0.5">
               <span className="text-green-400 text-xs font-mono">{formatTime(currentTime)}</span>
               <span className="text-green-400 text-xs font-mono">{formatTime(duration)}</span>
@@ -202,6 +233,13 @@ function MusicPlayer() {
               </svg>
             </button>
           </div>
+
+          {/* 3D Cube Visualizer - Only visible when music is not playing */}
+          <div 
+            ref={visualizerContainerRef}
+            className={`absolute top-[20%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}
+            style={{ pointerEvents: 'auto' }}
+          />
         </div>
       </div>
     </div>
