@@ -40,11 +40,13 @@ export class CubeVisualizer {
     this.renderer.setClearColor(0x000000, 0);
     this.container.appendChild(this.renderer.domElement);
 
-    // Create cube with glowing material
+    // Create cube with texture material
     const geometry = new THREE.BoxGeometry(3, 3, 3);
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('/texture.jpg');
+    
     const material = new THREE.MeshBasicMaterial({
-      color: 0x22c55e,
-      wireframe: true
+      map: texture
     });
     this.cube = new THREE.Mesh(geometry, material);
     this.scene.add(this.cube);
