@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Heart, Shuffle, Repeat } from 'lucide-react';
-import { CubeVisualizer } from './CubeVisualizer';
+import { H2RVisualizer } from './CubeVisualizer';
 import { PlaylistManager, Song } from '../utils/playlistManager';
 
 function MusicPlayer() {
@@ -17,7 +17,7 @@ function MusicPlayer() {
   const [currentTimeDisplay, setCurrentTimeDisplay] = useState(new Date());
   const playlistManager = useRef(new PlaylistManager());
   const audioRef = useRef<HTMLAudioElement>(null);
-  const visualizerRef = useRef<CubeVisualizer | null>(null);
+  const visualizerRef = useRef<H2RVisualizer | null>(null);
   const visualizerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -41,10 +41,10 @@ function MusicPlayer() {
     const interval = setInterval(() => {
       setMarqueePosition((prev) => {
         // Continuous scrolling - reset when text is completely out of view
-        if (prev <= -400) {
-          return 400; // Start from further right for continuous effect
+        if (prev <= -500) {
+          return 500; // Start from much further right for continuous effect
         }
-        return prev - 0.15; // Slower for better visibility
+        return prev - 0.1; // Much slower for better visibility
       });
     }, 50);
 
@@ -74,7 +74,7 @@ function MusicPlayer() {
 
   useEffect(() => {
     if (!isPlaying && visualizerContainerRef.current && !visualizerRef.current) {
-      visualizerRef.current = new CubeVisualizer(visualizerContainerRef.current);
+      visualizerRef.current = new H2RVisualizer(visualizerContainerRef.current);
       visualizerRef.current.start();
     } else if (isPlaying && visualizerRef.current) {
       visualizerRef.current.dispose();
@@ -405,7 +405,7 @@ function MusicPlayer() {
             </button>
           </div>
 
-          {/* 3D Cube Visualizer - Only visible when music is not playing */}
+          {/* 3D H2R Visualizer - Only visible when music is not playing */}
           <div 
             ref={visualizerContainerRef}
             className={`absolute top-[20%] left-1/2 -translate-x-1/2 w-64 h-64 flex items-center justify-center ${!isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}

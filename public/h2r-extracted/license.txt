@@ -1,0 +1,11 @@
+Model Information:
+* title:	Kawasaki-ninja-h2r-super-bike
+* source:	https://sketchfab.com/3d-models/kawasaki-ninja-h2r-super-bike-ee3e59850d9e414287488dd1a5bf5b29
+* author:	Hyp3rDayZz (https://sketchfab.com/Hyp3rDayZz)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Kawasaki-ninja-h2r-super-bike" (https://sketchfab.com/3d-models/kawasaki-ninja-h2r-super-bike-ee3e59850d9e414287488dd1a5bf5b29) by Hyp3rDayZz (https://sketchfab.com/Hyp3rDayZz) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

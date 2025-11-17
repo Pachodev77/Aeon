@@ -1,10 +1,11 @@
 import * as THREE from 'three';
+import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-export class CubeVisualizer {
+export class H2RVisualizer {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
-  private cube!: THREE.Mesh;
+  private model!: THREE.Group | THREE.Mesh;
   private animationId: number | null = null;
   private container: HTMLElement | null = null;
   private mouseX: number = 0;
@@ -40,32 +41,108 @@ export class CubeVisualizer {
     this.renderer.setClearColor(0x000000, 0);
     this.container.appendChild(this.renderer.domElement);
 
-    // Create cube with texture material
-    const geometry = new THREE.BoxGeometry(3, 3, 3);
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load('/texture.jpg');
-    
-    // Improve texture quality
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
-    texture.wrapS = THREE.ClampToEdgeWrapping;
-    texture.wrapT = THREE.ClampToEdgeWrapping;
-    texture.generateMipmaps = false;
-    
-    const material = new THREE.MeshBasicMaterial({
-      map: texture
+    // Load H2R model with error handling
+    const loader = new GLTFLoader();
+    loader.load('/h2r-extracted/scene.gltf', (gltf: GLTF) => {
+      this.model = gltf.scene;
+      
+      // Apply materials to make model fully colored and visible
+      this.model.traverse((child) => {
+        if (child instanceof THREE.Mesh) {
+          // Ensure mesh has proper material
+          if (child.material) {
+            // Make material fully opaque and colored
+            child.material.transparent = false;
+            child.material.opacity = 1.0;
+            child.material.needsUpdate = true;
+            
+            // If using basic material, convert to standard for better lighting
+            if (child.material instanceof THREE.MeshBasicMaterial) {
+              const color = child.material.color;
+              child.material = new THREE.MeshStandardMaterial({
+                color: color,
+                metalness: 0.3,
+                roughness: 0.4
+              });
+            }
+          }
+        }
+      });
+      
+      // Scale and position the model
+      this.model.scale.set(2.5, 2.5, 2.5); // Make model much larger
+      this.model.position.set(0, 0, 0);
+      
+      // Center the model
+      const box = new THREE.Box3().setFromObject(this.model);
+      const center = box.getCenter(new THREE.Vector3());
+      this.model.position.sub(center);
+      
+      this.scene.add(this.model);
+      console.log('H2R model loaded successfully!');
+    }, 
+    (progress: any) => {
+      console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
+    },
+    (error: any) => {
+      console.error('Error loading H2R model:', error);
+      // Fallback to a simple cube if model fails to load
+      const geometry = new THREE.BoxGeometry(2, 2, 2);
+      const material = new THREE.MeshStandardMaterial({ 
+        color: 0x22c55e,
+        metalness: 0.6,
+        roughness: 0.3
+      });
+      this.model = new THREE.Mesh(geometry, material);
+      this.scene.add(this.model);
     });
-    this.cube = new THREE.Mesh(geometry, material);
-    this.scene.add(this.cube);
 
-    // Add ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    // Add comprehensive lighting system for full model illumination
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Increased from 1.2 to 2.0
     this.scene.add(ambientLight);
 
-    // Add point light
-    const pointLight = new THREE.PointLight(0x22c55e, 1, 100);
-    pointLight.position.set(5, 5, 5);
-    this.scene.add(pointLight);
+    // Add multiple point lights for complete coverage
+    const pointLight1 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    pointLight1.position.set(5, 5, 5);
+    this.scene.add(pointLight1);
+
+    const pointLight2 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    pointLight2.position.set(-5, 5, 5);
+    this.scene.add(pointLight2);
+
+    const pointLight3 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    pointLight3.position.set(0, -5, 5);
+    this.scene.add(pointLight3);
+
+    // Add directional lights from multiple angles
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased from 1 to 2.0
+    directionalLight1.position.set(5, 5, 5);
+    this.scene.add(directionalLight1);
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased from 1 to 2.0
+    directionalLight2.position.set(-5, 5, -5);
+    this.scene.add(directionalLight2);
+
+    const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1.5); // Increased from 0.8 to 1.5
+    directionalLight3.position.set(0, -5, 0);
+    this.scene.add(directionalLight3);
+
+    // Add hemisphere light for ambient color variation
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x404040, 1.5); // Increased from 1 to 1.5
+    this.scene.add(hemisphereLight);
+
+    // Add additional spotlights for maximum shine
+    const spotLight1 = new THREE.SpotLight(0xffffff, 3.0, 100, Math.PI / 6, 0.5);
+    spotLight1.position.set(10, 10, 10);
+    spotLight1.target.position.set(0, 0, 0);
+    this.scene.add(spotLight1);
+    this.scene.add(spotLight1.target);
+
+    const spotLight2 = new THREE.SpotLight(0xffffff, 3.0, 100, Math.PI / 6, 0.5);
+    spotLight2.position.set(-10, 10, -10);
+    spotLight2.target.position.set(0, 0, 0);
+    this.scene.add(spotLight2);
+    this.scene.add(spotLight2.target);
   }
 
   public start() {
@@ -100,10 +177,8 @@ export class CubeVisualizer {
       if (!this.isDragging) return;
 
       const deltaX = event.clientX - this.mouseX;
-      const deltaY = event.clientY - this.mouseY;
-
+      // Only update horizontal rotation
       this.targetRotationY += deltaX * 0.01;
-      this.targetRotationX += deltaY * 0.01;
 
       this.mouseX = event.clientX;
       this.mouseY = event.clientY;
@@ -125,10 +200,8 @@ export class CubeVisualizer {
       if (!this.isDragging || event.touches.length !== 1) return;
 
       const deltaX = event.touches[0].clientX - this.mouseX;
-      const deltaY = event.touches[0].clientY - this.mouseY;
-
+      // Only update horizontal rotation
       this.targetRotationY += deltaX * 0.01;
-      this.targetRotationX += deltaY * 0.01;
 
       this.mouseX = event.touches[0].clientX;
       this.mouseY = event.touches[0].clientY;
@@ -152,19 +225,22 @@ export class CubeVisualizer {
   private animate() {
     this.animationId = requestAnimationFrame(() => this.animate());
 
-    // Smooth rotation towards target
-    this.cube.rotation.x += (this.targetRotationX - this.cube.rotation.x) * 0.1;
-    this.cube.rotation.y += (this.targetRotationY - this.cube.rotation.y) * 0.1;
+    // Smooth rotation towards target (horizontal only)
+    if (this.model) {
+      // Only rotate around Y axis (horizontal)
+      this.model.rotation.y += (this.targetRotationY - this.model.rotation.y) * 0.1;
+      // Keep X rotation fixed
+      this.model.rotation.x = 0;
+      this.model.rotation.z = 0;
 
-    // Auto-rotation when not dragging
-    if (!this.isDragging) {
-      this.targetRotationX += 0.005;
-      this.targetRotationY += 0.005;
+      // Auto-rotation when not dragging (horizontal only)
+      if (!this.isDragging) {
+        this.targetRotationY += 0.02; // Increased from 0.005 to 0.02 for faster rotation
+      }
+
+      // Remove pulse effect - keep constant scale
+      this.model.scale.set(2.5, 2.5, 2.5);
     }
-
-    // Pulse effect
-    const scale = 1 + Math.sin(Date.now() * 0.001) * 0.1;
-    this.cube.scale.set(scale, scale, scale);
 
     this.renderer.render(this.scene, this.camera);
   }
