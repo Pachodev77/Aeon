@@ -45,6 +45,13 @@ export class CubeVisualizer {
     const textureLoader = new THREE.TextureLoader();
     const texture = textureLoader.load('/texture.jpg');
     
+    // Improve texture quality
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.generateMipmaps = false;
+    
     const material = new THREE.MeshBasicMaterial({
       map: texture
     });
