@@ -40,10 +40,11 @@ function MusicPlayer() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMarqueePosition((prev) => {
-        if (prev <= -200) {
-          return 250;
+        // Continuous scrolling - reset when text is completely out of view
+        if (prev <= -400) {
+          return 400; // Start from further right for continuous effect
         }
-        return prev - 0.3;
+        return prev - 0.15; // Slower for better visibility
       });
     }, 50);
 
@@ -251,7 +252,7 @@ function MusicPlayer() {
                 {songs[currentSongIndex]?.title || 'ELECTRONIC FUTURE'}
               </h1>
             </div>
-            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '220px', transform: 'translateY(-4px)' }}>
+            <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.25rem 1rem', minWidth: '220px', transform: 'translateY(-6px)' }}>
               <p className="text-green-500 text-sm leading-none">{songs[currentSongIndex]?.artist || 'ELECTRONIC DREAMS'}</p>
             </div>
             <div className="rounded-lg inline-block mt-0.25" style={{ backgroundColor: '#010d0d', padding: '0.0625rem 0.5rem', transform: 'translateY(-3px)' }}>
