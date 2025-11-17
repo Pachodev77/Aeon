@@ -67,7 +67,7 @@ function MusicPlayer() {
   };
 
   return (
-    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center overflow-hidden bg-black">
+    <div className="relative w-full max-w-sm aspect-[9/16] mx-auto flex items-center justify-center bg-black" style={{ minHeight: '100vh' }}>
       <img
         src="/Copilot_20251116_160743.png"
         alt="Music Player Background"
@@ -251,8 +251,8 @@ function MusicPlayer() {
         </div>
       </div>
 
-      {/* Inverted background image for playlist at the bottom */}
-      <div className="absolute bottom-0 left-0 w-full h-1/3 overflow-hidden">
+      {/* Inverted background image for playlist - positioned below the main content */}
+      <div className="relative w-full h-96 bg-black">
         <img
           src="/Copilot_20251116_160743.png"
           alt="Playlist Background"
@@ -263,6 +263,22 @@ function MusicPlayer() {
             opacity: 0.7
           }}
         />
+        {/* Placeholder for playlist content */}
+        <div className="relative z-10 p-6 text-green-400">
+          <h2 className="text-xl font-bold mb-4">Playlist</h2>
+          <div className="space-y-2">
+            <div className="bg-green-950/80 p-3 rounded">Track 1 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 2 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 3 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 4 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 5 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 6 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 7 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 8 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 9 - Artist Name</div>
+            <div className="bg-green-950/80 p-3 rounded">Track 10 - Artist Name</div>
+          </div>
+        </div>
       </div>
     </div>
   );
