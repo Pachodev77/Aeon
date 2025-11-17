@@ -80,9 +80,14 @@ function MusicPlayer() {
         loop
         muted
         playsInline
+        preload="auto"
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0'}`}
         style={{ transform: 'scaleY(1.23)' }}
-      />
+      >
+        <source src="/grok-video.mp4" type="video/mp4; codecs=hev1" />
+        <source src="/grok-video.mp4" type="video/mp4; codecs=avc1" />
+        <source src="/grok-video.mp4" type="video/mp4" />
+      </video>
 
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
@@ -171,7 +176,7 @@ function MusicPlayer() {
             <Heart size={16} fill={isLiked ? "currentColor" : "none"} />
           </button>
 
-          <div className="absolute top-[78%] left-1/2 -translate-x-1/2 flex items-center justify-center gap-20">
+          <div className="absolute top-[79%] left-1/2 -translate-x-1/2 flex items-center justify-center gap-20">
             <div className="flex items-center justify-center gap-2.5" style={{ transform: 'translateX(-2px)' }}>
               <button className="w-6 h-6 rounded border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
