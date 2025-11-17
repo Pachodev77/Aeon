@@ -30,12 +30,12 @@ function MusicPlayer() {
   useEffect(() => {
     const interval = setInterval(() => {
       setMarqueePosition((prev) => {
-        if (prev <= -100) {
-          return 100; // Reset to right side
+        if (prev <= -150) {
+          return 100; 
         }
-        return prev - 0.5; // Move left slowly
+        return prev - 0.3; 
       });
-    }, 50); // Update every 50ms for smooth animation
+    }, 50); 
 
     return () => clearInterval(interval);
   }, []);
