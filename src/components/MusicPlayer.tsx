@@ -13,6 +13,7 @@ function MusicPlayer() {
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [songs, setSongs] = useState<Song[]>([]);
   const [currentSongIndex, setCurrentSongIndex] = useState(0);
+  const [marqueePosition, setMarqueePosition] = useState(0);
   const playlistManager = useRef(new PlaylistManager());
   const audioRef = useRef<HTMLAudioElement>(null);
   const visualizerRef = useRef<CubeVisualizer | null>(null);
@@ -24,6 +25,19 @@ function MusicPlayer() {
       setSongs(loadedSongs);
     };
     loadSongs();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setMarqueePosition((prev) => {
+        if (prev <= -100) {
+          return 100; // Reset to right side
+        }
+        return prev - 0.5; // Move left slowly
+      });
+    }, 50); // Update every 50ms for smooth animation
+
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -176,8 +190,14 @@ function MusicPlayer() {
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
           <div className={`absolute top-[16%] left-1/2 -translate-x-1/2 text-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
-            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)' }}>
-              <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
+            <div className="rounded-lg inline-block" style={{ backgroundColor: '#010d0d', padding: '0.125rem 0.5rem', transform: 'translateY(4px)', width: '200px', overflow: 'hidden' }}>
+              <h1 
+                className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap"
+                style={{ 
+                  transform: `translateX(${marqueePosition}%)`,
+                  transition: 'transform 0.05s linear'
+                }}
+              >
                 {songs[currentSongIndex]?.title || 'ELECTRONIC FUTURE'}
               </h1>
             </div>
