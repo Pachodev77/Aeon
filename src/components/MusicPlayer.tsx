@@ -72,6 +72,7 @@ function MusicPlayer() {
         src="/Copilot_20251116_160743.png"
         alt="Music Player Background"
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${showVideo ? 'opacity-0' : 'opacity-100'}`}
+        style={{ transform: 'scaleX(1.015)' }}
       />
       <video
         src="/grok-video.mp4"
@@ -84,14 +85,21 @@ function MusicPlayer() {
 
       <div className="relative w-full h-full flex flex-col items-center justify-center px-6">
         <div className="absolute inset-0" style={{ transform: 'translateY(69px)' }}>
-          <div className={`absolute top-[18%] left-1/2 -translate-x-1/2 text-center bg-green-950 px-2 py-1 rounded-lg transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
-            <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
-              ELECTRONIC FUTURE
-            </h1>
-            <p className="text-green-500 text-sm tracking-widest whitespace-nowrap">
-              ELECTRONIC DREAMS
-            </p>
-            <p className="text-green-400 text-sm mt-1">1:3:1</p>
+          <div className={`absolute top-[18%] left-1/2 -translate-x-1/2 text-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}>
+            <div className="bg-green-950 px-2 py-0.5 rounded-lg inline-block" style={{ transform: 'translateY(4px)' }}>
+              <h1 className="text-2xl font-bold text-green-400 tracking-wider mb-0.5 whitespace-nowrap">
+                ELECTRONIC FUTURE
+              </h1>
+            </div>
+            <div className="bg-green-950 px-4 py-1 rounded-lg inline-block mt-0.25">
+              <p className="text-green-500 text-sm tracking-widest whitespace-nowrap">
+                ELECTRONIC DREAMS
+              </p>
+            </div>
+            <br />
+            <div className="bg-green-950 px-2 py-1 rounded-lg inline-block">
+              <p className="text-green-400 text-sm">1:3:1</p>
+            </div>
           </div>
 
           <div className={`absolute top-[32%] left-1/2 -translate-x-1/2 w-48 h-48 flex items-center justify-center ${isPlaying ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`}>
