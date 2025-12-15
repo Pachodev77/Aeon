@@ -122,48 +122,118 @@ export class PlaylistManager {
     }
   }
 
+  // Helper method to recursively get all audio files from a directory
+  private async getAudioFilesFromDirectory(dirHandle: any): Promise<FileSystemFileHandle[]> {
+    const audioFiles: FileSystemFileHandle[] = [];
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'];
+    
+    // Get all entries in the directory
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file') {
+        const name = entry.name.toLowerCase();
+        if (audioExtensions.some(ext => name.endsWith(ext))) {
+          audioFiles.push(entry);
+        }
+      } else if (entry.kind === 'directory') {
+        // Recursively get files from subdirectories
+        const subDirFiles = await this.getAudioFilesFromDirectory(entry);
+        audioFiles.push(...subDirFiles);
+      }
+    }
+    return audioFiles;
+  }
+
   async loadLocalDeviceSongs(): Promise<Song[]> {
     try {
-      // Request user to select local music files
-      const fileInput = document.createElement('input');
-      fileInput.type = 'file';
-      fileInput.multiple = true;
-      fileInput.accept = 'audio/*'; // Accept all audio file types
-      
-      return new Promise<Song[]>((resolve) => {
-        fileInput.onchange = (event) => {
-          const files = (event.target as HTMLInputElement).files;
-          if (!files || files.length === 0) {
-            resolve([]);
-            return;
-          }
-
-          const localSongs: Song[] = Array.from(files).map((file, index) => {
-            // Extract artist and title from filename if possible
-            const fileName = file.name.replace(/\.[^/.]+$/, "");
-            const artistTitle = fileName.split(' - ');
-            const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
-            const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
-            
-            return {
-              id: `local-${Date.now()}-${index}`,
-              title: title,
-              artist: artist,
-              duration: 0,
-              url: URL.createObjectURL(file)
-            };
+      // Check if the browser supports the File System Access API
+      if ('showDirectoryPicker' in window) {
+        try {
+          const directoryHandle = await (window as any).showDirectoryPicker({
+            id: 'musicFolder',
+            mode: 'read',
+            startIn: 'music'
           });
 
+          // Get all audio files from the directory
+          const audioFiles = await this.getAudioFilesFromDirectory(directoryHandle);
+          
+          const localSongs: Song[] = [];
+          
+          for (const file of audioFiles) {
+            try {
+              const fileHandle = await file.getFile();
+              const fileName = file.name.replace(/\.[^/.]+$/, '');
+              const artistTitle = fileName.split(' - ');
+              const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
+              const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
+              
+              localSongs.push({
+                id: `local-${Date.now()}-${file.name}`,
+                title,
+                artist,
+                duration: 0,
+                url: URL.createObjectURL(fileHandle)
+              });
+            } catch (error) {
+              console.error(`Error processing file ${file.name}:`, error);
+            }
+          }
+          
           this.songs = localSongs;
-          resolve(localSongs);
-        };
+          return localSongs;
+          
+        } catch (error) {
+          console.error('Error accessing directory:', error);
+          return [];
+        }
+      } else {
+        // Fallback to file input for browsers that don't support the File System Access API
+        return new Promise<Song[]>((resolve) => {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.multiple = true;
+          fileInput.accept = 'audio/*';
+          
+          fileInput.onchange = async (event) => {
+            const files = (event.target as HTMLInputElement).files;
+            if (!files || files.length === 0) {
+              resolve([]);
+              return;
+            }
 
-        fileInput.oncancel = () => {
-          resolve([]);
-        };
+            const localSongs: Song[] = [];
+            
+            for (let i = 0; i < files.length; i++) {
+              const file = files[i];
+              try {
+                const fileName = file.name.replace(/\.[^/.]+$/, '');
+                const artistTitle = fileName.split(' - ');
+                const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
+                const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
+                
+                localSongs.push({
+                  id: `local-${Date.now()}-${i}`,
+                  title,
+                  artist,
+                  duration: 0,
+                  url: URL.createObjectURL(file)
+                });
+              } catch (error) {
+                console.error(`Error processing file ${file.name}:`, error);
+              }
+            }
 
-        fileInput.click();
-      });
+            this.songs = localSongs;
+            resolve(localSongs);
+          };
+
+          fileInput.oncancel = () => {
+            resolve([]);
+          };
+
+          fileInput.click();
+        });
+      }
     } catch (error) {
       console.error('Error loading local songs:', error);
       return [];
