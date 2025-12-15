@@ -145,49 +145,92 @@ export class PlaylistManager {
 
   async loadLocalDeviceSongs(): Promise<Song[]> {
     try {
+      this.songs = [];
+      
       // Check if the browser supports the File System Access API
       if ('showDirectoryPicker' in window) {
         try {
+          // Request directory access
           const directoryHandle = await (window as any).showDirectoryPicker({
             id: 'musicFolder',
             mode: 'read',
             startIn: 'music'
           });
 
+          console.log('Directory access granted, scanning for audio files...');
+          
           // Get all audio files from the directory
           const audioFiles = await this.getAudioFilesFromDirectory(directoryHandle);
+          console.log(`Found ${audioFiles.length} audio files`);
+          
+          if (audioFiles.length === 0) {
+            console.warn('No audio files found in the selected directory');
+            return [];
+          }
           
           const localSongs: Song[] = [];
           
+          // Process each audio file
           for (const file of audioFiles) {
             try {
               const fileHandle = await file.getFile();
+              
+              // Create a unique ID for the song
+              const songId = `local-${Date.now()}-${file.name}`.replace(/[^a-zA-Z0-9-_]/g, '_');
+              
+              // Extract artist and title from filename (format: "Artist - Title")
               const fileName = file.name.replace(/\.[^/.]+$/, '');
-              const artistTitle = fileName.split(' - ');
-              const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
-              const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
+              let artist = 'Unknown Artist';
+              let title = fileName;
+              
+              // Try to extract artist and title if in "Artist - Title" format
+              const artistTitleMatch = fileName.match(/^(.+?)\s*-\s*(.+)$/);
+              if (artistTitleMatch && artistTitleMatch.length === 3) {
+                artist = artistTitleMatch[1].trim();
+                title = artistTitleMatch[2].trim();
+              }
+              
+              // Create object URL for the file
+              const objectUrl = URL.createObjectURL(fileHandle);
+              
+              console.log(`Added song: ${artist} - ${title}`);
               
               localSongs.push({
-                id: `local-${Date.now()}-${file.name}`,
-                title,
-                artist,
-                duration: 0,
-                url: URL.createObjectURL(fileHandle)
+                id: songId,
+                title: title || 'Untitled',
+                artist: artist || 'Unknown Artist',
+                duration: 0, // Will be updated when the audio loads
+                url: objectUrl
               });
             } catch (error) {
               console.error(`Error processing file ${file.name}:`, error);
             }
           }
           
-          this.songs = localSongs;
-          return localSongs;
+          if (localSongs.length === 0) {
+            console.warn('No valid audio files could be processed');
+            return [];
+          }
+          
+          // Update the songs array
+          this.songs = [...localSongs];
+          this.currentSongIndex = 0; // Reset to first song
+          
+          console.log(`Successfully loaded ${this.songs.length} songs`);
+          return this.songs;
           
         } catch (error) {
-          console.error('Error accessing directory:', error);
+          if (error.name === 'AbortError' || error.name === 'NotAllowedError') {
+            console.log('User cancelled directory access');
+          } else {
+            console.error('Error accessing directory:', error);
+          }
           return [];
         }
       } else {
         // Fallback to file input for browsers that don't support the File System Access API
+        console.log('Using file input fallback for local files');
+        
         return new Promise<Song[]>((resolve) => {
           const fileInput = document.createElement('input');
           fileInput.type = 'file';
@@ -197,45 +240,75 @@ export class PlaylistManager {
           fileInput.onchange = async (event) => {
             const files = (event.target as HTMLInputElement).files;
             if (!files || files.length === 0) {
+              console.log('No files selected');
               resolve([]);
               return;
             }
 
+            console.log(`Processing ${files.length} files...`);
+            
             const localSongs: Song[] = [];
             
             for (let i = 0; i < files.length; i++) {
               const file = files[i];
               try {
+                // Create a unique ID for the song
+                const songId = `local-${Date.now()}-${i}`;
+                
+                // Extract artist and title from filename
                 const fileName = file.name.replace(/\.[^/.]+$/, '');
-                const artistTitle = fileName.split(' - ');
-                const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
-                const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
+                let artist = 'Unknown Artist';
+                let title = fileName;
+                
+                // Try to extract artist and title if in "Artist - Title" format
+                const artistTitleMatch = fileName.match(/^(.+?)\s*-\s*(.+)$/);
+                if (artistTitleMatch && artistTitleMatch.length === 3) {
+                  artist = artistTitleMatch[1].trim();
+                  title = artistTitleMatch[2].trim();
+                }
+                
+                // Create object URL for the file
+                const objectUrl = URL.createObjectURL(file);
+                
+                console.log(`Added song: ${artist} - ${title}`);
                 
                 localSongs.push({
-                  id: `local-${Date.now()}-${i}`,
-                  title,
-                  artist,
-                  duration: 0,
-                  url: URL.createObjectURL(file)
+                  id: songId,
+                  title: title || 'Untitled',
+                  artist: artist || 'Unknown Artist',
+                  duration: 0, // Will be updated when the audio loads
+                  url: objectUrl
                 });
               } catch (error) {
                 console.error(`Error processing file ${file.name}:`, error);
               }
             }
 
-            this.songs = localSongs;
-            resolve(localSongs);
+            if (localSongs.length === 0) {
+              console.warn('No valid audio files could be processed');
+              resolve([]);
+              return;
+            }
+
+            // Update the songs array
+            this.songs = [...localSongs];
+            this.currentSongIndex = 0; // Reset to first song
+            
+            console.log(`Successfully loaded ${this.songs.length} songs`);
+            resolve(this.songs);
           };
 
           fileInput.oncancel = () => {
+            console.log('File selection cancelled');
             resolve([]);
           };
 
+          // Trigger file selection dialog
           fileInput.click();
         });
       }
     } catch (error) {
-      console.error('Error loading local songs:', error);
+      console.error('Unexpected error in loadLocalDeviceSongs:', error);
       return [];
     }
   }
