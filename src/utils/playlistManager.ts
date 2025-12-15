@@ -128,8 +128,7 @@ export class PlaylistManager {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.multiple = true;
-      fileInput.accept = '.mp3,.wav,.ogg,.m4a,.flac,.aac'; // Specific audio formats
-      fileInput.setAttribute('capture', 'filesystem'); // Explicitly request file system access
+      fileInput.accept = 'audio/*'; // Accept all audio file types
       
       return new Promise<Song[]>((resolve) => {
         fileInput.onchange = (event) => {
@@ -139,13 +138,21 @@ export class PlaylistManager {
             return;
           }
 
-          const localSongs: Song[] = Array.from(files).map((file, index) => ({
-            id: `local-${index}`,
-            title: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-            artist: 'Local File',
-            duration: 0,
-            url: URL.createObjectURL(file)
-          }));
+          const localSongs: Song[] = Array.from(files).map((file, index) => {
+            // Extract artist and title from filename if possible
+            const fileName = file.name.replace(/\.[^/.]+$/, "");
+            const artistTitle = fileName.split(' - ');
+            const artist = artistTitle.length > 1 ? artistTitle[0] : 'Unknown Artist';
+            const title = artistTitle.length > 1 ? artistTitle.slice(1).join(' - ') : fileName;
+            
+            return {
+              id: `local-${Date.now()}-${index}`,
+              title: title,
+              artist: artist,
+              duration: 0,
+              url: URL.createObjectURL(file)
+            };
+          });
 
           this.songs = localSongs;
           resolve(localSongs);
