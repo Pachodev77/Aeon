@@ -390,25 +390,6 @@ function MusicPlayer() {
               </svg>
             </button>
 
-            <button 
-              onClick={async () => {
-                try {
-                  if (document.fullscreenElement) {
-                    await document.exitFullscreen();
-                  } else {
-                    await document.documentElement.requestFullscreen();
-                  }
-                } catch (err) {
-                  console.error('Error toggling fullscreen:', err);
-                }
-              }}
-              className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-              </svg>
-            </button>
-
             <button className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />
@@ -427,6 +408,25 @@ function MusicPlayer() {
             <button className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+              </svg>
+            </button>
+
+            <button 
+              onClick={async () => {
+                try {
+                  if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                  } else {
+                    await document.documentElement.requestFullscreen();
+                  }
+                } catch (err) {
+                  console.error('Error toggling fullscreen:', err);
+                }
+              }}
+              className="w-7 h-7 rounded-full border border-green-600/40 flex items-center justify-center text-green-500 hover:border-green-500 transition-colors opacity-60 hover:opacity-100"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
               </svg>
             </button>
           </div>
