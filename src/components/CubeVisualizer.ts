@@ -1,20 +1,16 @@
 import * as THREE from 'three';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
 export class H2RVisualizer {
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
   private renderer!: THREE.WebGLRenderer;
-  private model!: THREE.Group | THREE.Mesh;
+  private model!: THREE.Mesh;
   private animationId: number | null = null;
   private container: HTMLElement | null = null;
   private mouseX: number = 0;
   private mouseY: number = 0;
-  private targetRotationX: number = 0;
   private targetRotationY: number = 0;
   private isDragging: boolean = false;
-  private static cachedModel: THREE.Group | null = null;
-  private static isLoading: boolean = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -43,125 +39,54 @@ export class H2RVisualizer {
     this.renderer.setClearColor(0x000000, 0);
     this.container.appendChild(this.renderer.domElement);
 
-    // Load H2R model with caching
+    // Create and add the cube
     this.loadH2RModel();
+    
+    // Add lighting
+    this.setupLights();
+    
+    // Start animation loop
+    this.animate();
   }
 
-  private loadH2RModel() {
-    if (H2RVisualizer.cachedModel) {
-      this.model = H2RVisualizer.cachedModel.clone();
-      this.scene.add(this.model);
-      console.log('H2R model loaded from cache!');
-    } else if (!H2RVisualizer.isLoading) {
-      H2RVisualizer.isLoading = true;
-      const loader = new GLTFLoader();
-      loader.load('/h2r-extracted/scene.gltf', (gltf: GLTF) => {
-        H2RVisualizer.cachedModel = gltf.scene;
-        this.model = H2RVisualizer.cachedModel.clone();
-        
-        // Apply materials to make model fully colored and visible
-        this.model.traverse((child) => {
-          if (child instanceof THREE.Mesh) {
-            // Ensure mesh has proper material
-            if (child.material) {
-              // Make material fully opaque and colored
-              child.material.transparent = false;
-              child.material.opacity = 1.0;
-              child.material.needsUpdate = true;
-              
-              // If using basic material, convert to standard for better lighting
-              if (child.material instanceof THREE.MeshBasicMaterial) {
-                const color = child.material.color;
-                child.material = new THREE.MeshStandardMaterial({
-                  color: color,
-                  metalness: 0.3,
-                  roughness: 0.4
-                });
-              }
-            }
-          }
-        });
-        
-        // Scale and position the model
-        this.model.scale.set(2.5, 2.5, 2.5); // Make model larger for smaller container
-        this.model.position.set(0, 0, 0); // Start from center
-        
-        // Center the model
-        const box = new THREE.Box3().setFromObject(this.model);
-        const center = box.getCenter(new THREE.Vector3());
-        this.model.position.sub(center);
-        
-        // Apply downward offset after centering
-        this.model.position.y -= 0.2; // Move model slightly down within container (negative Y)
-        
-        this.scene.add(this.model);
-        console.log('H2R model loaded successfully!');
-        H2RVisualizer.isLoading = false;
-      }, 
-      (progress: any) => {
-        console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
-      },
-      (error: any) => {
-        console.error('Error loading H2R model:', error);
-        H2RVisualizer.isLoading = false;
-        // Fallback to a simple cube if model fails to load
-        const geometry = new THREE.BoxGeometry(2, 2, 2);
-        const material = new THREE.MeshStandardMaterial({ 
-          color: 0x22c55e,
-          metalness: 0.6,
-          roughness: 0.3
-        });
-        this.model = new THREE.Mesh(geometry, material);
-        this.scene.add(this.model);
-      });
-    }
-
-    // Add comprehensive lighting system for full model illumination
-    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0); // Increased from 1.2 to 2.0
+  private setupLights() {
+    // Add comprehensive lighting system for the cube
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2.0);
     this.scene.add(ambientLight);
 
     // Add multiple point lights for complete coverage
-    const pointLight1 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    const pointLight1 = new THREE.PointLight(0xffffff, 2.5, 100);
     pointLight1.position.set(5, 5, 5);
     this.scene.add(pointLight1);
 
-    const pointLight2 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    const pointLight2 = new THREE.PointLight(0xffffff, 2.5, 100);
     pointLight2.position.set(-5, 5, 5);
     this.scene.add(pointLight2);
 
-    const pointLight3 = new THREE.PointLight(0xffffff, 2.5, 100); // Increased from 1.5 to 2.5
+    const pointLight3 = new THREE.PointLight(0xffffff, 2.5, 100);
     pointLight3.position.set(0, -5, 5);
     this.scene.add(pointLight3);
+  }
 
-    // Add directional lights from multiple angles
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased from 1 to 2.0
-    directionalLight1.position.set(5, 5, 5);
-    this.scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2.0); // Increased from 1 to 2.0
-    directionalLight2.position.set(-5, 5, -5);
-    this.scene.add(directionalLight2);
-
-    const directionalLight3 = new THREE.DirectionalLight(0xffffff, 1.5); // Increased from 0.8 to 1.5
-    directionalLight3.position.set(0, -5, 0);
-    this.scene.add(directionalLight3);
-
-    // Add hemisphere light for ambient color variation
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x404040, 1.5); // Increased from 1 to 1.5
-    this.scene.add(hemisphereLight);
-
-    // Add additional spotlights for maximum shine
-    const spotLight1 = new THREE.SpotLight(0xffffff, 3.0, 100, Math.PI / 6, 0.5);
-    spotLight1.position.set(10, 10, 10);
-    spotLight1.target.position.set(0, 0, 0);
-    this.scene.add(spotLight1);
-    this.scene.add(spotLight1.target);
-
-    const spotLight2 = new THREE.SpotLight(0xffffff, 3.0, 100, Math.PI / 6, 0.5);
-    spotLight2.position.set(-10, 10, -10);
-    spotLight2.target.position.set(0, 0, 0);
-    this.scene.add(spotLight2);
-    this.scene.add(spotLight2.target);
+  private loadH2RModel() {
+    // Create a simple cube for visualization
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x00ff00,
+      shininess: 100,
+      specular: 0xffffff,
+      flatShading: true,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8,
+    });
+    
+    this.model = new THREE.Mesh(geometry, material);
+    this.scene.add(this.model);
+    
+    // Scale and position the cube
+    this.model.scale.set(2.5, 2.5, 2.5);
+    this.model.position.set(0, -0.2, 0); // Slightly lower the cube
   }
 
   public start() {
